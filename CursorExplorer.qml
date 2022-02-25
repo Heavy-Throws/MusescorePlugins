@@ -16,13 +16,76 @@ MuseScore {
       }
       
       onRun: {
-            nav_cursor.cursor.rewind(0);
-            nav_cursor.cursor.next();
+            console.log("Starting Bagpipe Plugin");
+            nav_cursor.cursor.inputStateMode = "INPUT_STATE_SYNC_WITH_SCORE";
             updateCursorPos();
       }
       
       function updateCursorPos() {
             text5.text = nav_cursor.cursor.tick;
+            textString.text = nav_cursor.cursor.stringNumber;
+            if(nav_cursor.cursor.inputStateMode == 0)
+                  text0.text = "Independant" 
+            else
+                  text0.text = "Synced"  
+            textTempo.text = nav_cursor.cursor.tempo;
+            textTime.text = nav_cursor.cursor.time;
+            textTrack.text = nav_cursor.cursor.track;
+            textVoice.text = nav_cursor.cursor.voice;
+            textFilter.text = nav_cursor.cursor.filter;
+            if(nav_cursor.cursor.element){
+                  textSelType.text = nav_cursor.cursor.element.name;
+                  try{
+                        textNotes.text = nav_cursor.cursor.element.notes.length;
+                  }catch(error){
+                        textNotes.text = "Error";
+                        console.log(nav_cursor.cursor.element.type);
+                        console.log(nav_cursor.cursor.element.name);
+                  }
+                  try{
+                        textGraces.text = nav_cursor.cursor.element.graceNotes.length;
+                  }catch (error){
+                        textGraces.text = "00"
+                        console.log("Error getting gracenotes");
+                  }
+            
+                  try
+                  {
+                        textScore.text = nav_cursor.cursor.score.scoreName;
+                  } catch (error) {
+                        textScore.text = "None";
+                        console.log("Error getting Score: ", nav_cursor.cursor.score);
+                  }
+
+                  try
+                  {textStaff.text = nav_cursor.cursor.staffIdx;
+                  } catch (error) {
+                        textStaff.text = "None";
+                        console.log("Error getting Staff Index: ", nav_cursor.cursor.staffidx);
+                  }
+                  
+                  try
+                  {textSegment.text = nav_cursor.cursor.segment.name;
+                  } catch (error) {
+                        textSegment.text = "None";
+                        console.log("Error getting Segment: ",nav_cursor.cursor.segment);
+                  }
+            
+                  try
+                  {textMeasure.text = nav_cursor.cursor.measure.name;
+                  } catch (error) {
+                        textMeasure.text = "None";
+                        console.log("Error getting measure: ", nav_cursor.cursor.measure);
+                  }
+            
+               
+                  try
+                  {textTimeSig.text = nav_cursor.cursor.keySignature;
+                  } catch (error) {
+                        textTimeSig.text = "None";
+                        console.log("Error getting Key Sig:", nav_cursor.cursor.keySignature);
+                  }
+            }
       }
       
       QtObject {
@@ -64,55 +127,7 @@ MuseScore {
                         else
                               text2.text = "Invalid";
                   }
-            }
-            Button {
-                  //todo: output something here.
-                  text: "Score"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "Score";
-                        text3.text = nav_cursor.cursor.score;
-                  }
-            }
-            Button {
-                  text: "Track"
-                  onClicked: {
-                        text1.text = "Track";
-                        text3.text = nav_cursor.cursor.track;
-                  }
-            }
-            Button {
-                  //todo:handle undefined
-                  text: "StaffIdx"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "Track";
-                        text3.text = nav_cursor.cursor.staffidx;
-                  }
-            }
-            Button {
-                  text: "Voice"
-                  onClicked: {
-                        text1.text = "Voice";
-                        text3.text = nav_cursor.cursor.voice;
-                  }
             }            
-            Button {
-                  text: "Filter"
-                  onClicked: {
-                        text1.text = "Filter";
-                        text3.text = nav_cursor.cursor.filter;
-                  }
-            }
-            Button {
-                  //todo:Make output make more sense
-                  text: "InputState"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "InState";
-                        text3.text = nav_cursor.cursor.inputStateMode;
-                  }
-            }               
             Button {
                   text: "Rwd Sel Start"
                   onClicked: {
@@ -130,76 +145,26 @@ MuseScore {
             Button {
                   text: "Refresh"
                   onClicked: {
+                        console.log("REFRESH");
                         text1.text = "Refresh Data";
-                        text5.text = nav_cursor.cursor.tick;
+                        updateCursorPos();
+                  }
+            } 
+            Button {
+                  text: "Add Rest"
+                  onClicked: {
+                        text1.text = "Add rest";
+                        nav_cursor.cursor.addRest();
                   }
             }                    
       }
       ColumnLayout{
-            Layout.alignment:Qt.AlignTop
-            Button {
-                  //todo: output something
-                  text: "Element"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "Element";
-                        text3.text = nav_cursor.cursor.element;
-                  }
-            }
-            Button {
-                  //todo: undefined, and output something
-                  text: "QMLSegment"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "QMLSement";
-                        text3.text = nav_cursor.cursor.qmlSegment;
-                  }
-            }            
-            Button {
-                  //todo: output something
-                  text: "Measure"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "Measure";
-                        text3.text = nav_cursor.cursor.measure;
-                  }
-            }
-            Button {
-                  text: "Tick"
-                  onClicked: {
-                        text1.text = "Tick";
-                        text3.text = nav_cursor.cursor.tick;
-                  }
-            }              
-            Button {
-                  text: "Time"
-                  onClicked: {
-                        text1.text = "Time";
-                        text3.text = nav_cursor.cursor.time;
-                  }
-            }              
-            Button {
-                  text: "Tempo"
-                  onClicked: {
-                        text1.text = "Tempo";
-                        text3.text = nav_cursor.cursor.tempo;
-                  }
-            }              
-            Button {
-                  //todo: undefined
-                  text: "TimeSig"
-                  enabled: false
-                  onClicked: {
-                        text1.text = "TimeSig";
-                        text3.text = nav_cursor.cursor.qmlKeySignature;
-                  }
-            }  
+            Layout.alignment:Qt.AlignTop                                   
             Button {
                   text: "Input Sync"
                   onClicked: {
                         text1.text = "Input Synced";
                         nav_cursor.cursor.inputStateMode = "INPUT_STATE_SYNC_WITH_SCORE";
-                        text3.text = nav_cursor.cursor.inputStateMode;
                         if(nav_cursor.cursor.inputStateMode == 0)
                               text0.text = "Independant" 
                         else
@@ -211,7 +176,6 @@ MuseScore {
                   onClicked: {
                         text1.text = "Input Independant";
                         nav_cursor.cursor.inputStateMode = "INPUT_STATE_INDEPENDENT";
-                        text3.text = nav_cursor.cursor.inputStateMode;
                         if(nav_cursor.cursor.inputStateMode == 0)
                               text0.text = "Independant" 
                         else
@@ -236,6 +200,38 @@ MuseScore {
                   id: tickText
                   text: "240"
                   inputMethodHints: Qt.ImhDigitsOnly;
+            }  
+            Button {
+                  text: "Add *"
+                  enabled: false
+                  onClicked: {
+                        text1.text = "Add *";
+                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                  }
+            }  
+            Button {
+                  text: "Add Note"
+                  enabled: false
+                  onClicked: {
+                        text1.text = "Add Note";
+                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                  }
+            }
+            Button {
+                  text: "Add Tuplet"
+                  enabled: false
+                  onClicked: {
+                        text1.text = "Add Tuplet";
+                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                  }
+            }  
+            Button {
+                  text: "Set dur"
+                  enabled: false
+                  onClicked: {
+                        text1.text = "Set Duration";
+                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                  }
             }             
       }
       }
@@ -247,15 +243,15 @@ MuseScore {
       }
       Text{
             id: text1Title
-            text: "Last Cmd"
+            text: "Last Request"
       }
       Text{
             id: text2Title
             text: "Cursor Valid?"
       }
       Text{
-            id: text3Title
-            text: "Data Point"
+            id: selTypeTitle
+            text: "Sel Type"
       }
       Text{
             id: text5Title
@@ -265,6 +261,58 @@ MuseScore {
             id: text4Title
             text: "Errors"
       }
+      Text{
+            id:titleTempo
+            text: "Tempo"
+      }
+      Text{
+            id:titleTime
+            text: "Time"
+      }
+      Text{
+            id: titleTrack
+            text: "Track"
+      }
+      Text{
+            id:titleVoice
+            text: "Voice"
+      }
+      Text{
+            id:titleFilter
+            text: "Filter"
+      }   
+      Text{
+            id:titleScore
+            text: "Score"
+      }
+      Text{
+            id:titleStaff
+            text: "Staff"
+      }  
+      Text{
+            id:titleMeasure
+            text: "Measure"
+      }  
+      Text{
+            id:titleSegment
+            text: "Segment"
+      }    
+      Text{
+            id:titleTimeSig
+            text: "Key Sig"
+      }    
+      Text{
+            id:titleGraces
+            text: "Gracenotes"
+      }    
+      Text{
+            id:titleNotes
+            text: "Notes"
+      } 
+      Text{
+            id:titleString
+            text: "String Num"
+      }    
       }
       ColumnLayout{
       Text{
@@ -280,7 +328,7 @@ MuseScore {
             text: "Valid"
       }
       Text{
-            id: text3
+            id: textSelType
             text: ""
       }
       Text{
@@ -290,7 +338,59 @@ MuseScore {
       Text{
             id: text4
             text: "."
-      }     
+      } 
+      Text{
+            id: textTempo
+            text: ""
+      }   
+      Text{
+            id: textTime
+            text: ""
+      } 
+      Text{
+            id: textTrack
+            text: ""
+      }   
+      Text{
+            id: textVoice
+            text: ""
+      } 
+      Text{
+            id: textFilter
+            text: ""
+      }
+      Text{
+            id: textScore
+            text: ""
+      } 
+      Text{
+            id: textStaff
+            text: ""
+      }  
+      Text{
+            id: textMeasure
+            text: ""
+      }  
+      Text{
+            id: textSegment
+            text: ""
+      }  
+      Text{
+            id: textTimeSig
+            text: ""
+      }
+      Text{
+            id: textGraces
+            text: ""
+      }  
+      Text{
+            id: textNotes
+            text: ""
+      }
+      Text{
+            id:textString
+            text: ""
+      }
       }
       }
       }
