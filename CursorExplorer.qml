@@ -11,226 +11,223 @@ MuseScore {
       dockArea: "right"
       implicitWidth:  250
       
+      property var cursor: curScore.newCursor();
+
       onScoreStateChanged: {
+            textLastCmd.text = "User Selection";
             updateCursorPos();
       }
       
       onRun: {
-            console.log("Starting Bagpipe Plugin");
-            nav_cursor.cursor.inputStateMode = "INPUT_STATE_SYNC_WITH_SCORE";
+            console.log("Starting Cursor Explorer");
+            cursor.inputStateMode = "INPUT_STATE_SYNC_WITH_SCORE";
             updateCursorPos();
       }
       
       function updateCursorPos() {
-            text5.text = nav_cursor.cursor.tick;
-            textString.text = nav_cursor.cursor.stringNumber;
-            if(nav_cursor.cursor.inputStateMode == 0)
-                  text0.text = "Independant" 
+            textTick.text = cursor.tick;
+            textString.text = cursor.stringNumber;
+            if(cursor.inputStateMode === 0)
+                  textSync.text = "Independant"
             else
-                  text0.text = "Synced"  
-            textTempo.text = nav_cursor.cursor.tempo;
-            textTime.text = nav_cursor.cursor.time;
-            textTrack.text = nav_cursor.cursor.track;
-            textVoice.text = nav_cursor.cursor.voice;
-            textFilter.text = nav_cursor.cursor.filter;
-            if(nav_cursor.cursor.element){
-                  textSelType.text = nav_cursor.cursor.element.name;
-                  try{
-                        textNotes.text = nav_cursor.cursor.element.notes.length;
-                  }catch(error){
-                        textNotes.text = "Error";
-                        console.log(nav_cursor.cursor.element.type);
-                        console.log(nav_cursor.cursor.element.name);
-                  }
-                  try{
-                        textGraces.text = nav_cursor.cursor.element.graceNotes.length;
-                  }catch (error){
-                        textGraces.text = "00"
-                        console.log("Error getting gracenotes");
-                  }
-            
-                  try
-                  {
-                        textScore.text = nav_cursor.cursor.score.scoreName;
-                  } catch (error) {
-                        textScore.text = "None";
-                        console.log("Error getting Score: ", nav_cursor.cursor.score);
-                  }
+                  textSync.text = "Synced"
+            textTempo.text = cursor.tempo;
+            textTime.text = cursor.time;
+            textTrack.text = cursor.track;
+            textVoice.text = cursor.voice;
+            textFilter.text = cursor.filter;
+            textTimeSig.text = cursor.keySignature;
+            textScore.text = cursor.score.scoreName;
+            textStaff.text = cursor.staffIdx;
 
-                  try
-                  {textStaff.text = nav_cursor.cursor.staffIdx;
-                  } catch (error) {
-                        textStaff.text = "None";
-                        console.log("Error getting Staff Index: ", nav_cursor.cursor.staffidx);
-                  }
-                  
-                  try
-                  {textSegment.text = nav_cursor.cursor.segment.name;
-                  } catch (error) {
-                        textSegment.text = "None";
-                        console.log("Error getting Segment: ",nav_cursor.cursor.segment);
-                  }
-            
-                  try
-                  {textMeasure.text = nav_cursor.cursor.measure.name;
-                  } catch (error) {
-                        textMeasure.text = "None";
-                        console.log("Error getting measure: ", nav_cursor.cursor.measure);
-                  }
-            
-               
-                  try
-                  {textTimeSig.text = nav_cursor.cursor.keySignature;
-                  } catch (error) {
-                        textTimeSig.text = "None";
-                        console.log("Error getting Key Sig:", nav_cursor.cursor.keySignature);
-                  }
+            //Check if anything is selected, end if nothing.
+            if(!cursor.element){
+                textSelType.text = "";
+                textNotes.text = "";
+                textGraces.text = "";
+                textSegment.text = "";
+                textMeasure.text = "";
+                textValid.text = "Invalid";
+                return false;
+            }
+
+            //Describe selection
+            switch (cursor.element.name){
+                case "Rest":
+                    textSelType.text = cursor.element.name;
+                    textNotes.text = "";
+                    textGraces.text = "";
+                    textSegment.text = cursor.segment.name;
+                    textMeasure.text = cursor.measure.name;
+                    break;
+                case "Chord":
+                    textSelType.text = cursor.element.name;
+                    textNotes.text = cursor.element.notes.length;
+                    textGraces.text = cursor.element.graceNotes.length;
+                    textSegment.text = cursor.segment.name;
+                    textMeasure.text = cursor.measure.name;
+                    break;
+                default:
+                    textSelType.text = "";
+                    textNotes.text = "";
+                    textGraces.text = "";
+                    textSegment.text = "";
+                    textMeasure.text = "";
             }
       }
+
       
-      QtObject {
-            id: nav_cursor;
-            property var cursor: curScore.newCursor();     
-      }
       ColumnLayout{
-      RowLayout{      
+      RowLayout{  
       ColumnLayout{
             Layout.alignment:Qt.AlignTop
             Button {
                   text: "Prev"
                   onClicked: {
-                        text1.text = "Prev";
-                        if(nav_cursor.cursor.prev())
-                              text2.text = "Valid";
+                        textLastCmd.text = "Prev";
+                        if(cursor.prev())
+                              textValid.text = "Valid";
                         else
-                              text2.text = "Invalid";
+                              textValid.text = "Invalid";
                         updateCursorPos();
                   }
             }
-            Button {
-                  text: "Next"
-                  onClicked: {
-                        text1.text = "Next";
-                        if(nav_cursor.cursor.next())
-                              text2.text = "Valid";
-                        else
-                              text2.text = "Invalid";
-                        updateCursorPos();
-                  }
-            }
-            Button {
-                  text: "NextMeas"
-                  onClicked: {
-                        text1.text = "Next Measure";
-                        if(nav_cursor.cursor.nextMeasure())
-                              text2.text = "Valid";
-                        else
-                              text2.text = "Invalid";
-                  }
-            }            
-            Button {
-                  text: "Rwd Sel Start"
-                  onClicked: {
-                        text1.text = "Rewind to selection start";
-                        nav_cursor.cursor.rewind(1);
-                  }
-            }  
-            Button {
-                  text: "Rewind Start"
-                  onClicked: {
-                        text1.text = "Rewind to start";
-                        nav_cursor.cursor.rewind(0);
-                  }
-            } 
-            Button {
-                  text: "Refresh"
-                  onClicked: {
-                        console.log("REFRESH");
-                        text1.text = "Refresh Data";
-                        updateCursorPos();
-                  }
-            } 
-            Button {
-                  text: "Add Rest"
-                  onClicked: {
-                        text1.text = "Add rest";
-                        nav_cursor.cursor.addRest();
-                  }
-            }                    
-      }
-      ColumnLayout{
-            Layout.alignment:Qt.AlignTop                                   
             Button {
                   text: "Input Sync"
                   onClicked: {
-                        text1.text = "Input Synced";
-                        nav_cursor.cursor.inputStateMode = "INPUT_STATE_SYNC_WITH_SCORE";
-                        if(nav_cursor.cursor.inputStateMode == 0)
-                              text0.text = "Independant" 
-                        else
-                              text0.text = "Synced"   
-                  }
-            }              
-            Button {
-                  text: "Input Ind"
-                  onClicked: {
-                        text1.text = "Input Independant";
-                        nav_cursor.cursor.inputStateMode = "INPUT_STATE_INDEPENDENT";
-                        if(nav_cursor.cursor.inputStateMode == 0)
-                              text0.text = "Independant" 
-                        else
-                              text0.text = "Synced"
+                        textLastCmd.text = "Input Synced";
+                        cursor.inputStateMode = "INPUT_STATE_SYNC_WITH_SCORE";
+                        updateCursorPos(); 
                   }
             } 
             Button {
-                  text: "Rwd Sel End"
+                  text: "Rewind Start"
                   onClicked: {
-                        text1.text = "Rewind to selection end";
-                        nav_cursor.cursor.rewind(2);
+                        textLastCmd.text = "Rewind to start";
+                        cursor.rewind(0);
                   }
             } 
             Button {
                   text: "Rwd Tick"
                   onClicked: {
-                        text1.text = "Rewind to Tick";
-                        nav_cursor.cursor.rewindToTick(tickText.text);
+                        textLastCmd.text = "Rewind to Tick";
+                        cursor.rewindToTick(tickText.text);
                   }
             }   
             TextInput {
                   id: tickText
                   text: "240"
                   inputMethodHints: Qt.ImhDigitsOnly;
-            }  
+            } 
+
             Button {
                   text: "Add *"
-                  enabled: false
                   onClicked: {
-                        text1.text = "Add *";
-                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                        var el = cursor.element;
+                        textLastCmd.text = "Add *";
+                        var chord = newElement(Element.CHORD);
+                        chord.track = cursor.track;
+                        //chord.type = GRACE32;
+                        var note = newElement(Element.NOTE);
+                        note.pitch = 79;
+                        //note.type = GRACE32;
+                        //chord.add(note);
+                        //cursor.add(chord);
+                        //cursor.add(a);
+                        //cursor.rewindToTick(tickText.text);
                   }
             }  
+      }    
+      ColumnLayout{
+            Layout.alignment:Qt.AlignTop
+            Button {
+                  text: "Next"
+                  onClicked: {
+                        textLastCmd.text = "Next";
+                        if(cursor.next())
+                              textValid.text = "Valid";
+                        else
+                              textValid.text = "Invalid";
+                        updateCursorPos();
+                  }
+            }
+            Button {
+                  text: "Input Ind"
+                  onClicked: {
+                        textLastCmd.text = "Input Independant";
+                        cursor.inputStateMode = "INPUT_STATE_INDEPENDENT";
+                        updateCursorPos();
+                  }
+            } 
+            Button {
+                  text: "Rwd Sel Start"
+                  onClicked: {
+                        textLastCmd.text = "Rewind to selection start";
+                        cursor.rewind(1);
+                  }
+            }  
+
+
+            Button {
+                  text: "Add Rest"
+                  onClicked: {
+                        textLastCmd.text = "Add rest";
+                        cursor.addRest();
+                  }
+            }                    
+      }
+      ColumnLayout{
+            Layout.alignment:Qt.AlignTop   
+            Button {
+                  text: "NextMeas"
+                  onClicked: {
+                        textLastCmd.text = "Next Measure";
+                        if(cursor.nextMeasure())
+                              textValid.text = "Valid";
+                        else
+                              textValid.text = "Invalid";
+                  }
+            }   
+            Button {
+                  text: "Refresh"
+                  onClicked: {
+                        console.log("REFRESH");
+                        textLastCmd.text = "Refresh Data";
+                        updateCursorPos();
+                  }
+            } 
+            Button {
+                  text: "Rwd Sel End"
+                  onClicked: {
+                        textLastCmd.text = "Rewind to selection end";
+                        cursor.rewind(2);
+                  }
+            }                                            
+ 
+ 
             Button {
                   text: "Add Note"
-                  enabled: false
                   onClicked: {
-                        text1.text = "Add Note";
-                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                        textLastCmd.text = "Add Note";
+                        cursor.track = 0;
+                        cursor.setDuration(1,8);
+                        cursor.addNote(73);
                   }
             }
             Button {
                   text: "Add Tuplet"
                   enabled: false
                   onClicked: {
-                        text1.text = "Add Tuplet";
-                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                        textLastCmd.text = "Add Tuplet";
+                        //cursor.rewindToTick(tickText.text);
                   }
             }  
             Button {
                   text: "Set dur"
                   enabled: false
                   onClicked: {
-                        text1.text = "Set Duration";
-                        //nav_cursor.cursor.rewindToTick(tickText.text);
+                        textLastCmd.text = "Set Duration";
+                        //cursor.rewindToTick(tickText.text);
                   }
             }             
       }
@@ -238,15 +235,15 @@ MuseScore {
       RowLayout{
       ColumnLayout{
       Text{
-            id: text0Title
+            id: textSyncTitle
             text: "Sync Mode"
       }
       Text{
-            id: text1Title
+            id: textLastCmdTitle
             text: "Last Request"
       }
       Text{
-            id: text2Title
+            id: textValidTitle
             text: "Cursor Valid?"
       }
       Text{
@@ -254,11 +251,11 @@ MuseScore {
             text: "Sel Type"
       }
       Text{
-            id: text5Title
+            id: textLoc
             text: "Cursor Loc"
       }      
       Text{
-            id: text4Title
+            id: textError
             text: "Errors"
       }
       Text{
@@ -316,15 +313,15 @@ MuseScore {
       }
       ColumnLayout{
       Text{
-            id: text0
+            id: textSync
             text: "Independant"
       }
       Text{
-            id: text1
+            id: textLastCmd
             text: ""
       }
       Text{
-            id: text2
+            id: textValid
             text: "Valid"
       }
       Text{
@@ -332,7 +329,7 @@ MuseScore {
             text: ""
       }
       Text{
-            id: text5
+            id: textTick
             text: ""
       }  
       Text{
